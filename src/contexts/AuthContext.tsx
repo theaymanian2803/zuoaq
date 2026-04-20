@@ -18,6 +18,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // If returning from OAuth, keep loading state true while Supabase parses the URL hash
+    if (window.location.hash.includes('access_token')) {
+      setLoading(true)
+    }
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -26,7 +31,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false)
     })
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) console.error('Supabase getSession error:', error)
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
@@ -39,7 +45,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin,
+        // Redirect back to the exact current path to ensure AuthProvider is mounted
+        redirectTo: window.location.origin + window.location.pathname,
       },
     })
 
@@ -48,7 +55,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
-
     if (error) throw error
   }
 

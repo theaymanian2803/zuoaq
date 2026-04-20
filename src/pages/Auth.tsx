@@ -1,12 +1,19 @@
 import { useAuth } from '@/contexts/AuthContext'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
 export default function Auth() {
-  const { user, signInWithGoogle } = useAuth()
+  const { user, signInWithGoogle, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+
+  // Listen for hash on mount to hold the loading state while Supabase digests the token
+  useEffect(() => {
+    if (window.location.hash.includes('access_token')) {
+      setLoading(true)
+    }
+  }, [])
 
   if (user) {
     return (
@@ -45,7 +52,7 @@ export default function Auth() {
 
       <button
         onClick={handleGoogleSignIn}
-        disabled={loading}
+        disabled={loading || authLoading}
         className="btn-luxury w-full flex items-center justify-center gap-3 disabled:opacity-50">
         <svg width="18" height="18" viewBox="0 0 24 24">
           <path
@@ -65,7 +72,7 @@ export default function Auth() {
             fill="#EA4335"
           />
         </svg>
-        {loading ? 'Signing in...' : 'Continue with Google'}
+        {loading || authLoading ? 'Signing in...' : 'Continue with Google'}
       </button>
 
       <p className="text-center text-xs text-muted-foreground mt-6">
