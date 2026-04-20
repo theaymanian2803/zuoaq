@@ -25,7 +25,7 @@ export default function Account() {
             products (
               id,
               name,
-              image_url
+              images
             )
           )
         `
@@ -156,13 +156,15 @@ export default function Account() {
                     {order.order_items.map((item: any, idx: number) => {
                       const product = item.products
                       const productLink = `/product/${product?.id}`
+                      // Safely grab the first image from the array, if it exists
+                      const firstImage = product?.images?.[0]
 
                       return (
                         <div key={idx} className="flex items-center gap-4">
                           <div className="w-16 h-16 bg-muted border border-border/50 overflow-hidden flex-shrink-0">
-                            {product?.image_url ? (
+                            {firstImage ? (
                               <img
-                                src={product.image_url}
+                                src={firstImage}
                                 alt={product?.name || 'Product'}
                                 className="w-full h-full object-cover"
                               />

@@ -1,7 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { useCart } from '@/contexts/CartContext'
 import { supabase } from '@/integrations/supabase/client'
-import { Check, User } from 'lucide-react'
+import { Check, Package, User } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -303,25 +303,35 @@ export default function Checkout() {
           <div className="bg-muted p-6 sticky top-24">
             <h3 className="font-serif text-sm mb-4">Order Summary</h3>
             <div className="space-y-3">
-              {items.map((item) => (
-                <div key={item.product.id} className="flex gap-3">
-                  <img
-                    src={item.product.image_url}
-                    alt={item.product.name}
-                    className="w-12 h-12 object-cover border border-border"
-                    loading="lazy"
-                    width={48}
-                    height={48}
-                  />
-                  <div className="flex-1">
-                    <p className="text-xs font-sans font-medium">{item.product.name}</p>
-                    <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+              {items.map((item) => {
+                const firstImage = item.product.images?.[0]
+
+                return (
+                  <div key={item.product.id} className="flex gap-3">
+                    {firstImage ? (
+                      <img
+                        src={firstImage}
+                        alt={item.product.name}
+                        className="w-12 h-12 object-cover border border-border"
+                        loading="lazy"
+                        width={48}
+                        height={48}
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-background border border-border flex items-center justify-center text-muted-foreground">
+                        <Package size={16} />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <p className="text-xs font-sans font-medium">{item.product.name}</p>
+                      <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                    </div>
+                    <p className="text-xs font-sans">
+                      ${(item.product.price * item.quantity).toFixed(2)}
+                    </p>
                   </div>
-                  <p className="text-xs font-sans">
-                    ${(item.product.price * item.quantity).toFixed(2)}
-                  </p>
-                </div>
-              ))}
+                )
+              })}
             </div>
             <div className="border-t border-border mt-6 pt-4 space-y-2">
               <div className="flex justify-between text-xs font-sans">
