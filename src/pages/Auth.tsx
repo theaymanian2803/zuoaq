@@ -8,7 +8,7 @@ export default function Auth() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
 
-  // Listen for hash on mount to hold the loading state while Supabase digests the token
+  // Explicitly check for returning from OAuth hash to hold UI loading
   useEffect(() => {
     if (window.location.hash.includes('access_token')) {
       setLoading(true)
@@ -33,7 +33,6 @@ export default function Auth() {
     setLoading(true)
     try {
       await signInWithGoogle()
-      // Supabase handles the OAuth redirect automatically, so we don't need manual routing here
     } catch (error: any) {
       console.error('Google sign-in error:', error)
       toast.error(error?.message || 'Something went wrong. Please try again.')
