@@ -1,120 +1,110 @@
-import { useParams, Link } from "react-router-dom";
-import { useState } from "react";
-import { useProduct } from "@/hooks/useProducts";
-import { useCart } from "@/contexts/CartContext";
-import { ArrowLeft, Upload } from "lucide-react";
-import type { CartItem } from "@/contexts/CartContext";
-import VirtualTryOn from "@/components/VirtualTryOn";
-import { tryonImageMap } from "@/lib/tryonImages";
-
-const prescriptionOptions: { value: CartItem["prescription_type"]; label: string }[] = [
-  { value: "none", label: "Non-prescription" },
-  { value: "reading", label: "Reading" },
-  { value: "distance", label: "Distance" },
-];
+import { useCart } from '@/contexts/CartContext'
+import { useProduct } from '@/hooks/useProducts'
+import { ArrowLeft, Heart } from 'lucide-react'
+import { useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
 
 export default function ProductDetail() {
-  const { id } = useParams();
-  const { addItem } = useCart();
-  const { data: product, isLoading } = useProduct(id);
-  const [prescriptionType, setPrescriptionType] = useState<CartItem["prescription_type"]>("none");
-  const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
-  const [tryOnOpen, setTryOnOpen] = useState(false);
+  const { id } = useParams()
+  const { addItem } = useCart()
+  const { data: product, isLoading } = useProduct(id)
+  const [activeImage, setActiveImage] = useState<number>(0)
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <main className="container mx-auto px-4 py-20 text-center">
         <p className="text-muted-foreground font-sans">Loading...</p>
       </main>
-    );
-  }
-
-  if (!product) {
+    )
+  if (!product)
     return (
       <main className="container mx-auto px-4 py-20 text-center">
         <p className="text-muted-foreground font-sans">Product not found.</p>
-        <Link to="/products" className="btn-outline-luxury mt-4 inline-block">Back to Shop</Link>
       </main>
-    );
-  }
+    )
+
+  const images = product.image_urls
 
   return (
-    <main className="container mx-auto px-4 md:px-8 py-8 md:py-16">
-      <Link to="/products" className="inline-flex items-center gap-2 text-xs font-sans tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors mb-8">
+    <main className="container mx-auto px-4 md:px-8 py-8 md:py-12 max-w-7xl">
+      <Link
+        to="/products"
+        className="inline-flex items-center gap-2 text-xs font-sans tracking-widest uppercase text-muted-foreground hover:text-foreground mb-8">
         <ArrowLeft size={14} /> Back
       </Link>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16">
-        <div className="aspect-square bg-muted overflow-hidden">
-          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" width={800} height={800} />
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        {/* Left Side: Luxury Image Gallery */}
+        <div className="lg:col-span-8 space-y-4">
+          <div className="relative aspect-[4/3] bg-[#f6f6f6] flex items-center justify-center overflow-hidden">
+            <img
+              src={images[activeImage]}
+              alt={product.name}
+              className="w-full h-full object-contain p-8"
+            />
+            <button className="absolute top-6 right-6 p-2 hover:scale-110 transition-transform">
+              <Heart size={20} strokeWidth={1.5} />
+            </button>
+          </div>
 
-        <div className="flex flex-col justify-center">
-          <p className="section-subheading mb-2 capitalize">{product.category}</p>
-          <h1 className="font-serif text-3xl md:text-4xl mb-2">{product.name}</h1>
-          <p className="text-xl font-sans mb-6">${product.price}</p>
-          <p className="text-sm font-sans text-muted-foreground leading-relaxed mb-8">{product.description}</p>
-
-          <div className="grid grid-cols-2 gap-4 mb-8 pb-8 border-b border-border">
-            {Object.entries(product.specs).map(([key, val]) => (
-              <div key={key}>
-                <p className="text-xs font-sans text-muted-foreground capitalize">{key.replace("_", " ")}</p>
-                <p className="text-sm font-sans mt-0.5">{val}</p>
+          <div className="grid grid-cols-2 gap-4">
+            {images.map((url, idx) => (
+              <div
+                key={idx}
+                onClick={() => setActiveImage(idx)}
+                className={`aspect-square bg-[#f6f6f6] cursor-pointer transition-all ${activeImage === idx ? 'ring-1 ring-inset ring-foreground' : 'opacity-80 hover:opacity-100'}`}>
+                <img
+                  src={url}
+                  alt={`${product.name} view ${idx}`}
+                  className="w-full h-full object-cover"
+                />
               </div>
             ))}
           </div>
+        </div>
 
-          <div className="mb-6">
-            <p className="text-xs font-sans tracking-widest uppercase text-muted-foreground mb-3">Lens Type</p>
-            <div className="flex flex-wrap gap-2">
-              {prescriptionOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setPrescriptionType(opt.value)}
-                  className={`px-4 py-2 text-xs font-sans border transition-all ${prescriptionType === opt.value ? "bg-primary text-primary-foreground border-primary" : "bg-transparent border-border hover:border-foreground"}`}
-                >
-                  {opt.label}
-                </button>
+        {/* Right Side: Product Info */}
+        <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit">
+          <div className="mb-2 flex items-center justify-between">
+            <h1 className="font-serif text-2xl uppercase tracking-wider">{product.name}</h1>
+          </div>
+          <p className="text-xl font-sans mb-6">${product.price}</p>
+
+          <div className="space-y-6">
+            <div className="space-y-1 border-t border-border pt-4">
+              <div className="flex justify-between items-center text-[11px] font-sans uppercase tracking-widest">
+                <span className="text-muted-foreground">Frame</span>
+                <span>
+                  {product.material} {product.frame_shape}
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => addItem(product)}
+              className="w-full bg-foreground text-white py-4 text-[11px] font-sans tracking-[0.2em] uppercase hover:opacity-90 transition-opacity">
+              Add to Cart — ${product.price}
+            </button>
+
+            <div className="pt-4 border-t border-border">
+              <p className="text-xs font-sans text-muted-foreground leading-relaxed">
+                {product.description}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
+              {Object.entries(product.specs).map(([key, val]) => (
+                <div key={key}>
+                  <p className="text-[10px] font-sans text-muted-foreground uppercase tracking-widest">
+                    {key.replace('_', ' ')}
+                  </p>
+                  <p className="text-sm font-sans mt-0.5">{val}</p>
+                </div>
               ))}
             </div>
           </div>
-
-          {prescriptionType !== "none" && (
-            <div className="mb-8">
-              <label className="flex items-center gap-3 px-4 py-3 border border-dashed border-border cursor-pointer hover:border-foreground transition-colors">
-                <Upload size={16} className="text-muted-foreground" />
-                <span className="text-xs font-sans text-muted-foreground">
-                  {prescriptionFile ? prescriptionFile.name : "Upload prescription (PDF or Image)"}
-                </span>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  className="hidden"
-                  onChange={(e) => setPrescriptionFile(e.target.files?.[0] || null)}
-                />
-              </label>
-            </div>
-          )}
-
-          <div className="flex gap-3">
-            <button onClick={() => addItem(product, prescriptionType)} className="btn-luxury flex-1">
-              Add to Cart
-            </button>
-            <button onClick={() => setTryOnOpen(true)} className="btn-outline-luxury">Virtual Try-On</button>
-          </div>
-
-          {product.stock <= 5 && (
-            <p className="text-xs font-sans text-muted-foreground mt-4">Only {product.stock} left in stock</p>
-          )}
         </div>
       </div>
-
-      <VirtualTryOn
-        isOpen={tryOnOpen}
-        onClose={() => setTryOnOpen(false)}
-        productImage={tryonImageMap[product.id] || product.image_url}
-        productName={product.name}
-      />
     </main>
-  );
+  )
 }

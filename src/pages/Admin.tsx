@@ -21,7 +21,7 @@ const emptyForm = {
   category: 'sunglasses',
   frame_shape: 'round',
   material: 'acetate',
-  image_url: '',
+  image_urls: [] as string[],
   stock: '0',
   lens_width: '',
   bridge_width: '',
@@ -95,7 +95,7 @@ export default function Admin() {
         category: product.category,
         frame_shape: product.frame_shape,
         material: product.material,
-        image_url: product.image_url.trim() || null,
+        image_urls: product.image_urls.filter((url) => url.trim() !== ''),
         stock: parseInt(product.stock) || 0,
         lens_width: product.lens_width.trim() || null,
         bridge_width: product.bridge_width.trim() || null,
@@ -148,7 +148,7 @@ export default function Admin() {
       category: p.category,
       frame_shape: p.frame_shape,
       material: p.material,
-      image_url: p.image_url || '',
+      image_urls: p.image_urls || [],
       stock: String(p.stock),
       lens_width: p.lens_width || '',
       bridge_width: p.bridge_width || '',
@@ -170,24 +170,24 @@ export default function Admin() {
     addMutation.mutate(form)
   }
 
-  const update = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }))
+  const update = (field: string, value: any) => setForm((f) => ({ ...f, [field]: value }))
 
   if (authLoading)
     return (
-      <main className="container mx-auto px-4 py-20 text-center">
+      <main className="container mx-auto px-4 py-20 text-center min-h-[calc(100vh-24rem)] flex-grow">
         <p className="text-sm font-sans text-muted-foreground">Loading...</p>
       </main>
     )
   if (!user) return <Navigate to="/auth" />
   if (roleLoading)
     return (
-      <main className="container mx-auto px-4 py-20 text-center">
+      <main className="container mx-auto px-4 py-20 text-center min-h-[calc(100vh-24rem)] flex-grow">
         <p className="text-sm font-sans text-muted-foreground">Checking permissions...</p>
       </main>
     )
   if (!isAdmin)
     return (
-      <main className="container mx-auto px-4 py-20 text-center">
+      <main className="container mx-auto px-4 py-20 text-center min-h-[calc(100vh-24rem)] flex-grow">
         <Shield size={48} className="text-muted-foreground mx-auto mb-4" />
         <h1 className="font-serif text-2xl mb-2">Access Denied</h1>
         <p className="text-sm font-sans text-muted-foreground">You don't have admin privileges.</p>
@@ -198,7 +198,7 @@ export default function Admin() {
     'w-full bg-transparent border border-border px-3 py-2 text-sm font-sans focus:outline-none focus:border-foreground transition-colors'
 
   return (
-    <main className="container mx-auto px-4 md:px-8 py-12 max-w-5xl">
+    <main className="container mx-auto px-4 md:px-8 py-12 max-w-5xl min-h-[calc(100vh-24rem)] flex-grow">
       <h1 className="font-serif text-2xl md:text-3xl mb-6">Admin Dashboard</h1>
 
       {/* Tabs */}
@@ -350,10 +350,40 @@ export default function Admin() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ProductImageUpload
-                  imageUrl={form.image_url}
-                  onImageChange={(url) => update('image_url', url)}
-                />
+                <div className="col-span-1 md:col-span-2 space-y-4">
+                  <label className="text-xs font-sans text-muted-foreground block">
+                    Product Images
+                  </label>
+                  {form.image_urls.map((url, index) => (
+                    <div key={index} className="flex items-start gap-4">
+                      <div className="flex-grow">
+                        <ProductImageUpload
+                          imageUrl={url}
+                          onImageChange={(newUrl) => {
+                            const newUrls = [...form.image_urls]
+                            newUrls[index] = newUrl
+                            update('image_urls', newUrls)
+                          }}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newUrls = form.image_urls.filter((_, i) => i !== index)
+                          update('image_urls', newUrls)
+                        }}
+                        className="p-2 text-muted-foreground hover:text-destructive transition-colors mt-8">
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => update('image_urls', [...form.image_urls, ''])}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+                    <Plus size={16} /> Add Image
+                  </button>
+                </div>
                 <div>
                   <label className="text-xs font-sans text-muted-foreground mb-1 block">
                     Stock
@@ -368,6 +398,7 @@ export default function Admin() {
                   />
                 </div>
               </div>
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <input
                   placeholder="Lens width"
@@ -429,9 +460,9 @@ export default function Admin() {
                     <tr key={p.id} className="group">
                       <td className="py-4">
                         <div className="flex items-center gap-3">
-                          {p.image_url && (
+                          {p.image_urls && p.image_urls.length > 0 && (
                             <img
-                              src={p.image_url}
+                              src={p.image_urls[0]}
                               alt={p.name}
                               className="w-10 h-10 object-cover"
                             />

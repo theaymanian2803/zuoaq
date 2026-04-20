@@ -1,9 +1,9 @@
-import { Link } from "react-router-dom";
-import { Minus, Plus, X, ShoppingBag } from "lucide-react";
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from '@/contexts/CartContext'
+import { Minus, Plus, ShoppingBag, X } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 export default function Cart() {
-  const { items, removeItem, updateQuantity, total, itemCount } = useCart();
+  const { items, removeItem, updateQuantity, total, itemCount } = useCart()
 
   if (items.length === 0) {
     return (
@@ -17,7 +17,7 @@ export default function Cart() {
           Continue Shopping
         </Link>
       </main>
-    );
+    )
   }
 
   return (
@@ -31,23 +31,28 @@ export default function Cart() {
             <div key={item.product.id} className="flex gap-4 md:gap-6 py-6 first:pt-0">
               <Link to={`/product/${item.product.id}`}>
                 <img
-                  src={item.product.image_url}
+                  src={item.product.image_urls?.[0] || '/placeholder.svg'}
                   alt={item.product.name}
-                  className="w-24 h-24 md:w-32 md:h-32 object-cover"
+                  className="w-24 h-24 md:w-32 md:h-32 object-cover bg-muted"
                   loading="lazy"
                   width={128}
                   height={128}
+                  onError={(e) => {
+                    ;(e.target as HTMLImageElement).src = '/placeholder.svg'
+                  }}
                 />
               </Link>
               <div className="flex-1 flex flex-col justify-between">
                 <div>
-                  <Link to={`/product/${item.product.id}`} className="font-serif text-sm md:text-base hover:underline">
+                  <Link
+                    to={`/product/${item.product.id}`}
+                    className="font-serif text-sm md:text-base hover:underline">
                     {item.product.name}
                   </Link>
                   <p className="text-xs font-sans text-muted-foreground mt-1 capitalize">
                     {item.product.category} · {item.product.material}
                   </p>
-                  {item.prescription_type && item.prescription_type !== "none" && (
+                  {item.prescription_type && item.prescription_type !== 'none' && (
                     <p className="text-xs font-sans text-muted-foreground mt-0.5 capitalize">
                       Prescription: {item.prescription_type}
                     </p>
@@ -56,15 +61,13 @@ export default function Cart() {
                 <div className="flex items-center gap-3 mt-3">
                   <button
                     onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                    className="w-8 h-8 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
-                  >
+                    className="w-8 h-8 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">
                     <Minus size={14} />
                   </button>
                   <span className="text-sm font-sans w-8 text-center">{item.quantity}</span>
                   <button
                     onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                    className="w-8 h-8 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
-                  >
+                    className="w-8 h-8 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">
                     <Plus size={14} />
                   </button>
                 </div>
@@ -72,8 +75,7 @@ export default function Cart() {
               <div className="flex flex-col items-end justify-between">
                 <button
                   onClick={() => removeItem(item.product.id)}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
+                  className="text-muted-foreground hover:text-foreground transition-colors">
                   <X size={16} />
                 </button>
                 <p className="text-sm font-sans font-medium">
@@ -107,13 +109,12 @@ export default function Cart() {
             </Link>
             <Link
               to="/products"
-              className="block text-center text-xs font-sans text-muted-foreground hover:text-foreground mt-4 transition-colors"
-            >
+              className="block text-center text-xs font-sans text-muted-foreground hover:text-foreground mt-4 transition-colors">
               Continue Shopping
             </Link>
           </div>
         </div>
       </div>
     </main>
-  );
+  )
 }

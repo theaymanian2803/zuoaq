@@ -2,7 +2,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useCart } from '@/contexts/CartContext'
 import { supabase } from '@/integrations/supabase/client'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronRight, Menu, Search, ShoppingBag, User, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, Menu, Search, ShoppingBag, User, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -15,6 +15,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false)
 
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -29,6 +30,17 @@ export default function Header() {
         .eq('role', 'admin')
         .maybeSingle()
       return !!data
+    },
+  })
+
+  // Fetch dynamic categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('categories').select('*').order('name')
+
+      if (error) throw error
+      return data || []
     },
   })
 
@@ -60,7 +72,7 @@ export default function Header() {
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`)
       setSearchOpen(false)
-      setSearchQuery('')
+      searchQuery('')
       setMobileMenuOpen(false)
     }
   }
@@ -86,20 +98,40 @@ export default function Header() {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
+              {/* Eyewear Dropdown */}
+              <div className="relative group">
+                <button className="flex items-center gap-1 text-xs font-sans tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors py-2">
+                  Eyewear{' '}
+                  <ChevronDown
+                    size={14}
+                    className="group-hover:rotate-180 transition-transform duration-200"
+                  />
+                </button>
+
+                {/* Dropdown Menu */}
+                <div className="absolute top-full left-0 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="bg-background border border-border shadow-lg py-2 flex flex-col">
+                    {categories.map((category) => (
+                      <Link
+                        key={category.id}
+                        to={`/products?category=${category.slug}`}
+                        className="px-4 py-2 text-xs font-sans tracking-widest uppercase text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
+                        {category.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <Link
-                to="/products?category=sunglasses"
+                to="/about"
                 className="text-xs font-sans tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors">
-                Sunglasses
+                About Us
               </Link>
               <Link
-                to="/products?category=bluelight"
+                to="/highlights"
                 className="text-xs font-sans tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors">
-                Blue Light
-              </Link>
-              <Link
-                to="/products?category=prescription"
-                className="text-xs font-sans tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors">
-                Prescription
+                highlights
               </Link>
             </nav>
 
@@ -245,25 +277,46 @@ export default function Header() {
 
             {/* Main Categories */}
             <nav className="flex flex-col space-y-6 mb-auto">
+              {/* Mobile Eyewear Dropdown */}
+              <div className="flex flex-col">
+                <button
+                  onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
+                  className="flex items-center justify-between font-serif text-3xl text-foreground hover:text-muted-foreground transition-colors w-full text-left">
+                  Eyewear{' '}
+                  <ChevronDown
+                    size={24}
+                    strokeWidth={1}
+                    className={`text-muted-foreground/50 transition-transform ${mobileDropdownOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {mobileDropdownOpen && (
+                  <div className="flex flex-col space-y-4 mt-4 ml-4 border-l border-border pl-4 animate-in fade-in slide-in-from-top-2">
+                    {categories.map((category) => (
+                      <Link
+                        key={category.id}
+                        to={`/products?category=${category.slug}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="font-serif text-xl text-muted-foreground hover:text-foreground transition-colors">
+                        {category.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <Link
-                to="/products?category=sunglasses"
+                to="/about"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center justify-between font-serif text-3xl text-foreground hover:text-muted-foreground transition-colors">
-                Sunglasses{' '}
+                About Us{' '}
                 <ChevronRight size={24} strokeWidth={1} className="text-muted-foreground/50" />
               </Link>
               <Link
-                to="/products?category=bluelight"
+                to="/highlights"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center justify-between font-serif text-3xl text-foreground hover:text-muted-foreground transition-colors">
-                Blue Light{' '}
-                <ChevronRight size={24} strokeWidth={1} className="text-muted-foreground/50" />
-              </Link>
-              <Link
-                to="/products?category=prescription"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between font-serif text-3xl text-foreground hover:text-muted-foreground transition-colors">
-                Prescription{' '}
+                highlights
                 <ChevronRight size={24} strokeWidth={1} className="text-muted-foreground/50" />
               </Link>
             </nav>

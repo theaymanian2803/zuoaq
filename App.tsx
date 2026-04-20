@@ -8,11 +8,13 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { CartProvider } from '@/contexts/CartContext'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import AboutUs from './src/pages/AboutUs'
 import Account from './src/pages/Account'
 import Admin from './src/pages/Admin'
 import Auth from './src/pages/Auth'
 import Cart from './src/pages/Cart'
 import Checkout from './src/pages/Checkout'
+import Highlights from './src/pages/Highlights'
 import Index from './src/pages/Index'
 import NotFound from './src/pages/NotFound'
 import ProductDetail from './src/pages/ProductDetail'
@@ -33,6 +35,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/products" element={<Products />} />
+              <Route path="/highlights" element={<Highlights />} />
+              <Route path="/about" element={<AboutUs />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
