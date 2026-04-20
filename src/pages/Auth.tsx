@@ -8,7 +8,6 @@ export default function Auth() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
 
-  // Explicitly check for returning from OAuth hash to hold UI loading
   useEffect(() => {
     if (window.location.hash.includes('access_token')) {
       setLoading(true)

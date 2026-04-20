@@ -18,7 +18,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // If returning from OAuth, hold loading state true while Supabase parses the token
     if (window.location.hash.includes('access_token')) {
       setLoading(true)
     }
@@ -45,8 +44,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        // Redirect back to the exact current page to ensure AuthProvider is mounted
-        redirectTo: window.location.origin + window.location.pathname,
+        // This dynamically adapts.
+        // Locally it resolves to: http://localhost:8080/auth
+        // In Prod it resolves to: https://zouaqoptic.unccode.org/auth
+        redirectTo: `${window.location.origin}${window.location.pathname}`,
       },
     })
 
