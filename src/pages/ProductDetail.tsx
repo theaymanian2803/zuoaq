@@ -1,6 +1,6 @@
 import { useCart } from '@/contexts/CartContext'
 import { useProduct } from '@/hooks/useProducts'
-import { ArrowLeft, Heart } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
@@ -40,13 +40,9 @@ export default function ProductDetail() {
             <img
               src={images[activeImage]}
               alt={product.name}
-              className="w-full h-full object-contain p-8"
+              className="w-full h-full object-cover"
             />
-            <button className="absolute top-6 right-6 p-2 hover:scale-110 transition-transform">
-              <Heart size={20} strokeWidth={1.5} />
-            </button>
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             {images.map((url, idx) => (
               <div

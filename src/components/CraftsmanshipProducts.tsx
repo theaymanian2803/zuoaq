@@ -5,12 +5,13 @@ import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 // --- 1. Product Type Definition from your Schema ---
+// Defined based on your SQL schema, representing the fields we are selecting
 interface Product {
   id: string
   name: string
   price: number
   description: string | null
-  image_urls: string[] | null // Your schema uses an array of images
+  image_urls: string[] | null
 }
 
 // --- 2. Framer Motion Animation Variants ---
@@ -43,21 +44,23 @@ export default function CraftsmanshipProducts() {
     data: products = [],
     isLoading,
     isError,
-  } = useQuery<Product[]>({
+  } = useQuery({
     queryKey: ['craftsmanship-products'],
-    queryFn: async () => {
-      // Corrected select to fetch your image_urls column
+    // Explicitly define the return type of the query function to fix the 'any' error
+    queryFn: async (): Promise<Product[]> => {
       const { data, error } = await supabase
         .from('products')
         .select('id, name, price, description, image_urls')
         .order('created_at', { ascending: false }) // Show newest first
-        .limit(12) // Limit for this section
+        .limit(8) // Restricted to 8 products as requested
 
       if (error) {
         console.error('Error fetching craftsmanship products:', error)
         throw error
       }
-      return data
+
+      // Cast the returned data to match our Product interface
+      return data as Product[]
     },
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   })
@@ -91,12 +94,12 @@ export default function CraftsmanshipProducts() {
       {/* --- B. Animated & Scrollable Products Section --- */}
       <section className="bg-muted/10 border-t border-border">
         {/*
-          IMPORTANT: This div's styles make it vertically scrollable.
-          - max-h-[80vh]: Sets a max height (e.g., 80% of viewport).
-          - overflow-y-auto: Enables the scrollbar only when needed.
-          - scroll-snap-type/y mandatory: (Optional) for snap scrolling effects.
+          Added standard CSS to hide scrollbars:
+          - [scrollbar-width:none] for Firefox
+          - [-ms-overflow-style:none] for IE/Edge
+          - [&::-webkit-scrollbar]:hidden for Chrome/Safari/Edge
         */}
-        <div className="max-h-[80vh] overflow-y-auto w-full scroll-smooth snap-y mandatory">
+        <div className="max-h-[80vh] overflow-y-auto w-full scroll-smooth snap-y mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <motion.div
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 w-full"
             variants={containerVariants}
@@ -106,7 +109,6 @@ export default function CraftsmanshipProducts() {
           >
             {products.map((product) => {
               // --- Handle Multiple Images from your Schema ---
-              // Corrected: Uses product.image_urls
               const firstImage = product.image_urls?.[0] || '/images/product-placeholder.jpg'
               const productUrl = `/product/${product.id}`
 

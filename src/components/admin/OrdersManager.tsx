@@ -144,7 +144,7 @@ export default function OrdersManager() {
                             <span className="font-medium text-foreground">{item.quantity}x</span>{' '}
                             {item.products?.id ? (
                               <Link
-                                to={`/products/${item.products.id}`}
+                                to={`/product/${item.products.id}`}
                                 className="hover:text-foreground underline underline-offset-2 transition-colors">
                                 {item.products.name}
                               </Link>
