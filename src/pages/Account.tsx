@@ -25,7 +25,7 @@ export default function Account() {
             products (
               id,
               name,
-              images
+              image_urls
             )
           )
         `
@@ -156,8 +156,8 @@ export default function Account() {
                     {order.order_items.map((item: any, idx: number) => {
                       const product = item.products
                       const productLink = `/product/${product?.id}`
-                      // Safely grab the first image from the array, if it exists
-                      const firstImage = product?.images?.[0]
+                      // Safely grab the first image from the array using the exact column name
+                      const firstImage = product?.image_urls?.[0]
 
                       return (
                         <div key={idx} className="flex items-center gap-4">

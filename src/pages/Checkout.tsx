@@ -15,7 +15,7 @@ export default function Checkout() {
   const [currentStep, setCurrentStep] = useState(0)
   const [orderPlaced, setOrderPlaced] = useState(false)
   const [placing, setPlacing] = useState(false)
-  const [guestCheckout, setGuestCheckout] = useState(false) // Tracks if they chose guest mode
+  const [guestCheckout, setGuestCheckout] = useState(false)
 
   const [form, setForm] = useState({
     email: '',
@@ -62,7 +62,6 @@ export default function Checkout() {
   }
 
   // --- AUTHENTICATION GATEWAY ---
-  // If no user is logged in AND they haven't explicitly chosen guest checkout yet
   if (!user && !guestCheckout) {
     return (
       <main className="container mx-auto px-4 py-20 max-w-md text-center animate-fade-up">
@@ -114,11 +113,10 @@ export default function Checkout() {
   const handlePlaceOrder = async () => {
     setPlacing(true)
     try {
-      // 1. Create the Order (user_id is now optional for guests)
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: user?.id || null, // Will be null for guests
+          user_id: user?.id || null,
           total,
           status: 'pending_cod',
           shipping_name: `${form.firstName} ${form.lastName}`,
@@ -132,7 +130,6 @@ export default function Checkout() {
 
       if (orderError) throw orderError
 
-      // 2. Create the Order Items
       const orderItems = items.map((item) => ({
         order_id: order.id,
         product_id: item.product.id,
@@ -161,7 +158,6 @@ export default function Checkout() {
     <main className="container mx-auto px-4 md:px-8 py-12 max-w-4xl animate-fade-up">
       <h1 className="font-serif text-2xl md:text-3xl mb-8">Checkout</h1>
 
-      {/* Steps */}
       <div className="flex items-center gap-4 mb-12">
         {steps.map((step, i) => (
           <div key={step} className="flex items-center gap-2">
@@ -181,7 +177,6 @@ export default function Checkout() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-12">
-        {/* Form */}
         <div className="md:col-span-3 space-y-6">
           {currentStep === 0 && (
             <>
@@ -304,7 +299,8 @@ export default function Checkout() {
             <h3 className="font-serif text-sm mb-4">Order Summary</h3>
             <div className="space-y-3">
               {items.map((item) => {
-                const firstImage = item.product.images?.[0]
+                // Ensure we are using image_urls as defined in the schema
+                const firstImage = item.product.image_urls?.[0]
 
                 return (
                   <div key={item.product.id} className="flex gap-3">
