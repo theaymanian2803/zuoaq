@@ -6,6 +6,7 @@ import heroTopImage from '@/assets/hero-eyewear.jpg'
 import productWomenImage from '@/assets/product-bluelight.jpg'
 import productMenImage from '@/assets/product-sunglasses.jpg'
 
+import CraftsmanshipProducts from '@/components/CraftsmanshipProducts'
 import { useCart } from '@/contexts/CartContext'
 
 const steps = [
@@ -150,19 +151,24 @@ export default function Index() {
             <br />
             <span className="italic text-muted-foreground">built for the journey.</span>
           </h2>
-          <div className="w-px h-16 bg-border mx-auto my-8" />
+          <div className="w-px h-16 bg-border mx-auto" />
           <p className="text-sm md:text-base font-sans text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Every frame is hand-finished by artisans in small batches using only the finest
             materials sourced from Italy and Japan. We believe eyewear is an extension of your
             identity.
           </p>
-          <div className="pt-8">
+          <div className="pt-3">
             <Link
               to="/products"
               className="text-xs font-sans tracking-[0.3em] uppercase underline underline-offset-8 hover:text-muted-foreground transition-colors">
-              Our Craftsmanship
+              own the season
             </Link>
           </div>
+        </div>
+      </section>
+      <section>
+        <div className="p-7">
+          <CraftsmanshipProducts />
         </div>
       </section>
     </main>
