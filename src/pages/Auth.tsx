@@ -27,8 +27,9 @@ export default function Auth() {
     try {
       await signInWithGoogle()
       // Supabase handles the OAuth redirect automatically, so we don't need manual routing here
-    } catch {
-      toast.error('Something went wrong. Please try again.')
+    } catch (error: any) {
+      console.error('Google sign-in error:', error)
+      toast.error(error?.message || 'Something went wrong. Please try again.')
       setLoading(false)
     }
   }
