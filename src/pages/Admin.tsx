@@ -10,8 +10,11 @@ import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
-const SHAPES = ['round', 'square', 'aviator'] as const
-const MATERIALS = ['acetate', 'metal'] as const
+// Using these as suggestions now, allowing custom typing in the form
+const SHAPES = ['round', 'square', 'aviator', 'cat-eye', 'rectangle', 'oval', 'geometric']
+const MATERIALS = ['acetate', 'metal', 'titanium', 'tr90', 'mixed']
+const LEGACY_CATEGORIES = ['sunglasses', 'bluelight', 'prescription']
+
 const TABS = ['Products', 'Categories', 'Brands', 'Orders'] as const
 
 const emptyForm = {
@@ -92,9 +95,9 @@ export default function Admin() {
         name: product.name.trim(),
         price: parseFloat(product.price),
         description: product.description.trim() || null,
-        category: product.category,
-        frame_shape: product.frame_shape,
-        material: product.material,
+        category: product.category.trim() || 'uncategorized',
+        frame_shape: product.frame_shape.trim() || 'unspecified',
+        material: product.material.trim() || 'unspecified',
         image_urls: product.image_urls.filter((url) => url.trim() !== ''),
         stock: parseInt(product.stock) || 0,
         lens_width: product.lens_width.trim() || null,
@@ -202,12 +205,12 @@ export default function Admin() {
       <h1 className="font-serif text-2xl md:text-3xl mb-6">Admin Dashboard</h1>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-border mb-8">
+      <div className="flex gap-1 border-b border-border mb-8 overflow-x-auto overflow-y-hidden">
         {TABS.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2.5 text-sm font-sans transition-colors border-b-2 -mb-px ${activeTab === tab ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
+            className={`px-4 py-2.5 text-sm font-sans transition-colors border-b-2 -mb-px whitespace-nowrap ${activeTab === tab ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
             {tab}
           </button>
         ))}
@@ -240,8 +243,11 @@ export default function Admin() {
           </div>
 
           {showForm && (
-            <form onSubmit={handleSubmit} className="border border-border p-6 mb-8 space-y-4">
+            <form
+              onSubmit={handleSubmit}
+              className="border border-border p-6 mb-8 space-y-4 bg-background">
               <h3 className="font-serif text-lg">{editingId ? 'Edit Product' : 'New Product'}</h3>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   placeholder="Product name *"
@@ -261,17 +267,18 @@ export default function Admin() {
                   required
                 />
               </div>
+
               <textarea
                 placeholder="Description"
                 value={form.description}
                 onChange={(e) => update('description', e.target.value)}
-                className={inputClass + ' min-h-[80px]'}
+                className={inputClass + ' min-h-[80px] resize-y'}
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-sans text-muted-foreground mb-1 block">
-                    Category
+                    Category (Relational)
                   </label>
                   <select
                     value={form.category_id}
@@ -308,44 +315,52 @@ export default function Admin() {
                   <label className="text-xs font-sans text-muted-foreground mb-1 block">
                     Legacy Category
                   </label>
-                  <select
+                  <input
+                    list="legacy-categories"
+                    placeholder="Select or type category..."
                     value={form.category}
                     onChange={(e) => update('category', e.target.value)}
-                    className={inputClass}>
-                    <option value="sunglasses">Sunglasses</option>
-                    <option value="bluelight">Blue Light</option>
-                    <option value="prescription">Prescription</option>
-                  </select>
+                    className={inputClass}
+                  />
+                  <datalist id="legacy-categories">
+                    {LEGACY_CATEGORIES.map((c) => (
+                      <option key={c} value={c} />
+                    ))}
+                  </datalist>
                 </div>
                 <div>
                   <label className="text-xs font-sans text-muted-foreground mb-1 block">
                     Frame Shape
                   </label>
-                  <select
+                  <input
+                    list="shapes-list"
+                    placeholder="Select or type shape..."
                     value={form.frame_shape}
                     onChange={(e) => update('frame_shape', e.target.value)}
-                    className={inputClass}>
+                    className={inputClass}
+                  />
+                  <datalist id="shapes-list">
                     {SHAPES.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
+                      <option key={s} value={s} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
                 <div>
                   <label className="text-xs font-sans text-muted-foreground mb-1 block">
                     Material
                   </label>
-                  <select
+                  <input
+                    list="materials-list"
+                    placeholder="Select or type material..."
                     value={form.material}
                     onChange={(e) => update('material', e.target.value)}
-                    className={inputClass}>
+                    className={inputClass}
+                  />
+                  <datalist id="materials-list">
                     {MATERIALS.map((m) => (
-                      <option key={m} value={m}>
-                        {m}
-                      </option>
+                      <option key={m} value={m} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
               </div>
 
@@ -443,57 +458,67 @@ export default function Admin() {
               No products yet.
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm font-sans">
-                <thead>
-                  <tr className="border-b border-border text-left">
-                    <th className="pb-3 font-medium text-muted-foreground">Product</th>
-                    <th className="pb-3 font-medium text-muted-foreground">Brand</th>
-                    <th className="pb-3 font-medium text-muted-foreground">Category</th>
-                    <th className="pb-3 font-medium text-muted-foreground">Price</th>
-                    <th className="pb-3 font-medium text-muted-foreground">Stock</th>
-                    <th className="pb-3 font-medium text-muted-foreground text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {products.map((p: any) => (
-                    <tr key={p.id} className="group">
-                      <td className="py-4">
-                        <div className="flex items-center gap-3">
-                          {p.image_urls && p.image_urls.length > 0 && (
-                            <img
-                              src={p.image_urls[0]}
-                              alt={p.name}
-                              className="w-10 h-10 object-cover"
-                            />
-                          )}
-                          <span className="font-medium">{p.name}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 text-muted-foreground">{p.brands?.name || '—'}</td>
-                      <td className="py-4 text-muted-foreground">
-                        {p.categories?.name || p.category}
-                      </td>
-                      <td className="py-4">${p.price}</td>
-                      <td className="py-4">{p.stock}</td>
-                      <td className="py-4 text-right">
-                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => startEdit(p)}
-                            className="p-1.5 hover:text-foreground text-muted-foreground">
-                            <Edit2 size={14} />
-                          </button>
-                          <button
-                            onClick={() => deleteMutation.mutate(p.id)}
-                            className="p-1.5 hover:text-destructive text-muted-foreground">
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
+            <div className="rounded-lg border border-border bg-background shadow-sm overflow-hidden">
+              <div className="overflow-x-auto overflow-y-hidden">
+                <table className="w-full text-sm font-sans min-w-[500px]">
+                  <thead className="bg-muted/30">
+                    <tr className="border-b border-border text-left">
+                      <th className="py-4 px-4 font-medium text-muted-foreground whitespace-nowrap">
+                        Product
+                      </th>
+                      <th className="py-4 px-4 font-medium text-muted-foreground whitespace-nowrap">
+                        Brand
+                      </th>
+                      <th className="py-4 px-4 font-medium text-muted-foreground whitespace-nowrap">
+                        Price
+                      </th>
+                      <th className="py-4 px-4 font-medium text-muted-foreground whitespace-nowrap">
+                        Stock
+                      </th>
+                      <th className="py-4 px-4 font-medium text-muted-foreground text-right whitespace-nowrap">
+                        Actions
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {products.map((p: any) => (
+                      <tr key={p.id} className="hover:bg-muted/20 transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            {p.image_urls && p.image_urls.length > 0 && (
+                              <img
+                                src={p.image_urls[0]}
+                                alt={p.name}
+                                className="w-10 h-10 object-cover rounded border border-border"
+                              />
+                            )}
+                            <span className="font-medium whitespace-nowrap">{p.name}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-muted-foreground">{p.brands?.name || '—'}</td>
+                        <td className="py-3 px-4 font-medium">${p.price}</td>
+                        <td className="py-3 px-4 text-muted-foreground">{p.stock}</td>
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => startEdit(p)}
+                              className="p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                              title="Edit">
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => deleteMutation.mutate(p.id)}
+                              className="p-2 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                              title="Delete">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </>

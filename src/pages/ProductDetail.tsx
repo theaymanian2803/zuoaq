@@ -1,3 +1,4 @@
+import RelatedProducts from '@/components/RelatedProducts'
 import { useCart } from '@/contexts/CartContext'
 import { useProduct } from '@/hooks/useProducts'
 import { ArrowLeft } from 'lucide-react'
@@ -44,7 +45,7 @@ export default function ProductDetail() {
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            {images.map((url, idx) => (
+            {images.map((url: string, idx: number) => (
               <div
                 key={idx}
                 onClick={() => setActiveImage(idx)}
@@ -68,9 +69,9 @@ export default function ProductDetail() {
 
           <div className="space-y-6">
             <div className="space-y-1 border-t border-border pt-4">
-              <div className="flex justify-between items-center text-[11px] font-sans uppercase tracking-widest">
-                <span className="text-muted-foreground">Frame</span>
-                <span>
+              <div className="flex justify-between items-start text-[11px] font-sans uppercase tracking-widest gap-4">
+                <span className="text-muted-foreground shrink-0">Frame</span>
+                <span className="text-right flex-wrap">
                   {product.material} {product.frame_shape}
                 </span>
               </div>
@@ -94,13 +95,20 @@ export default function ProductDetail() {
                   <p className="text-[10px] font-sans text-muted-foreground uppercase tracking-widest">
                     {key.replace('_', ' ')}
                   </p>
-                  <p className="text-sm font-sans mt-0.5">{val}</p>
+                  <p className="text-sm font-sans mt-0.5">{val as React.ReactNode}</p>
                 </div>
               ))}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Related Products positioned full width below the main product details */}
+      <RelatedProducts
+        currentProductId={product.id}
+        categoryId={product.category_id}
+        legacyCategory={product.category}
+      />
     </main>
   )
 }
