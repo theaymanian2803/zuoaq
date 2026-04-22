@@ -14,8 +14,11 @@ import Admin from './src/pages/Admin'
 import Auth from './src/pages/Auth'
 import Cart from './src/pages/Cart'
 import Checkout from './src/pages/Checkout'
+import EssayageDomicile from './src/pages/EssayageDomicile'
+import Faq from './src/pages/Faq'
 import Highlights from './src/pages/Highlights'
 import Index from './src/pages/Index'
+import LivraisonRetours from './src/pages/LivraisonRetours'
 import NotFound from './src/pages/NotFound'
 import ProductDetail from './src/pages/ProductDetail'
 import Products from './src/pages/Products'
@@ -43,6 +46,12 @@ const App = () => (
               <Route path="/admin" element={<Admin />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/account" element={<Account />} />
+
+              {/* Nouvelles pages */}
+              <Route path="/try-on" element={<EssayageDomicile />} />
+              <Route path="/shipping" element={<LivraisonRetours />} />
+              <Route path="/faq" element={<Faq />} />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Footer />

@@ -6,61 +6,54 @@ const clientHighlights = [
   {
     id: 1,
     src: '/one.png',
-    frame: 'Classic Aviator',
+
     height: 'h-[400px]',
   },
   {
     id: 2,
     src: '/eleven.png',
-    frame: 'Blue Light Round',
+
     height: 'h-[300px]',
   },
   {
     id: 3,
     src: '/three.png',
-    frame: 'Modern Tortoiseshell',
+
     height: 'h-[500px]',
   },
   {
     id: 4,
     src: '/four.png',
-    frame: 'Matte Black Square',
     height: 'h-[350px]',
   },
   {
     id: 5,
     src: '/five.png',
-    frame: 'Vintage Cat-Eye',
     height: 'h-[450px]',
   },
   {
     id: 6,
     src: '/six.png',
-    frame: 'Clear Frame Readers',
     height: 'h-[300px]',
   },
   {
     id: 7,
     src: '/seven.png',
-    frame: 'Gold Wireframe',
     height: 'h-[400px]',
   },
   {
     id: 8,
     src: '/eight.png',
-    frame: 'Sport Sunglasses',
     height: 'h-[350px]',
   },
   {
     id: 8,
     src: '/nine.png',
-    frame: 'Sport Sunglasses',
     height: 'h-[350px]',
   },
   {
     id: 8,
     src: '/ten.png',
-    frame: 'Sport Sunglasses',
     height: 'h-[350px]',
   },
 ]
@@ -95,11 +88,7 @@ const HighlightCard = ({ client, index }) => {
       />
 
       {/* Minimalist Overlay that appears on hover */}
-      <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-4 text-center">
-        <p className="text-sm font-sans tracking-widest uppercase text-muted-foreground">
-          {client.frame}
-        </p>
-      </div>
+      <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-20 transition-opacity duration-300 flex flex-col items-center justify-center p-4 text-center"></div>
     </motion.div>
   )
 }
